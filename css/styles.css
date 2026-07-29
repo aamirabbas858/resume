@@ -1,0 +1,495 @@
+/* ─────────────────────────────────────────────────────────────
+   Tokens. Neutrals sit on hue 260 with almost no chroma, so the
+   greys read cool rather than dead — a pure grey looks unchosen.
+   ───────────────────────────────────────────────────────────── */
+:root {
+  --bg:          oklch(0.14 0.01 260);
+  --bg-raised:   oklch(0.17 0.012 260);
+  --line:        oklch(0.26 0.012 260);
+  --line-soft:   oklch(0.22 0.01 260);
+
+  --text:        oklch(0.94 0.005 260);
+  --text-dim:    oklch(0.72 0.01 260);
+  /* Lightness set by measurement, not taste: 0.56 came out at 4.29:1 on
+     this background, just under the 4.5 needed for small text. */
+  --text-faint:  oklch(0.575 0.012 260);
+
+  --accent:      #4dd0e1;
+  --accent-glow: oklch(0.75 0.13 205 / 0.16);
+  --violet:      oklch(0.72 0.16 300);
+
+  /* IBM Plex Sans: built for technical documentation, so it reads as
+     engineering without becoming unreadable at paragraph length the way a
+     monospace body would. */
+  --sans:    'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --display: 'Sora', var(--sans);
+  --mono:    'JetBrains Mono', ui-monospace, monospace;
+
+  --shell: 1180px;
+  --r:     16px;
+
+  /* Apple's UI curve: quick to leave, slow to settle. */
+  --ease:  cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  /* Anchored sections stop below the sticky nav rather than under it. */
+  scroll-padding-top: 88px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 16.5px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+h1, h2, h3 { font-family: var(--display); letter-spacing: -0.025em; text-wrap: balance; }
+p { text-wrap: pretty; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--text); }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.skip {
+  position: absolute; left: -9999px;
+  background: var(--accent); color: #06131a;
+  padding: 10px 16px; border-radius: 8px; font-weight: 600; z-index: 100;
+}
+.skip:focus { left: 16px; top: 16px; }
+
+/* ─────────────── ambient background ─────────────── */
+.ambient { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+
+.orb {
+  position: absolute; border-radius: 50%;
+  filter: blur(90px); opacity: 0.5;
+}
+.orb-1 {
+  width: 44vw; height: 44vw; top: -14vw; left: -8vw;
+  background: radial-gradient(circle, var(--accent-glow), transparent 68%);
+}
+.orb-2 {
+  width: 38vw; height: 38vw; top: 46vh; right: -10vw;
+  background: radial-gradient(circle, oklch(0.6 0.14 300 / 0.13), transparent 68%);
+}
+.orb-3 {
+  width: 46vw; height: 46vw; bottom: -16vw; left: 18vw;
+  background: radial-gradient(circle, oklch(0.62 0.11 205 / 0.09), transparent 70%);
+}
+
+#constellation {
+  position: absolute; top: 0; left: 0;
+  /* Width and height are set by JS in CSS pixels to match the backing
+     bitmap. Stretching it with percentages here would scale the bitmap and
+     soften every line. */
+  opacity: 0.9;
+}
+
+.grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(oklch(1 0 0 / 0.022) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(1 0 0 / 0.022) 1px, transparent 1px);
+  background-size: 68px 68px;
+  /* Faded out at the edges so the grid never reads as a table. Safari still
+     wants the prefix, and without it the grid runs hard to the viewport edge. */
+  -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 40%, #000 35%, transparent 84%);
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 40%, #000 35%, transparent 84%);
+}
+
+/* ─────────────── nav ─────────────── */
+nav {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 24px; padding: 16px clamp(20px, 4vw, 48px);
+  background: oklch(0.14 0.01 260 / 0.55);
+  backdrop-filter: blur(14px) saturate(1.5);
+  border-bottom: 1px solid transparent;
+  transition: background .35s var(--ease), border-color .35s var(--ease), padding .35s var(--ease);
+}
+/* Set by JS once the page has scrolled — the bar earns its weight. */
+nav.scrolled {
+  background: oklch(0.13 0.01 260 / 0.82);
+  border-bottom-color: var(--line-soft);
+  padding-top: 11px; padding-bottom: 11px;
+}
+
+.brand { display: flex; align-items: center; color: var(--text); }
+.brand-name {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(19px, 2.1vw, 25px);
+  letter-spacing: -0.035em;
+  line-height: 1;
+  /* The gradient sits on the text itself rather than a tile beside it, and
+     shifts on hover — the name is the logo. */
+  background: linear-gradient(96deg, var(--text) 18%, var(--accent) 62%, var(--violet));
+  background-size: 200% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  transition: background-position .7s var(--ease);
+}
+.brand:hover .brand-name { background-position: 100% 0; }
+/* The bar tightens on scroll, so the name shrinks with it rather than
+   fighting the reduced height. */
+nav.scrolled .brand-name { font-size: clamp(17px, 1.8vw, 21px); }
+
+.nav-links { display: flex; align-items: center; gap: 4px; }
+.nav-links a {
+  padding: 8px 13px; border-radius: 9px;
+  color: var(--text-dim); font-size: 14.5px; font-weight: 500;
+  transition: color .2s, background .2s;
+}
+.nav-links a:hover { color: var(--text); background: oklch(1 0 0 / 0.05); }
+.nav-links a.active { color: var(--accent); }
+
+.nav-cta {
+  margin-left: 8px;
+  border: 1px solid var(--line);
+  color: var(--text) !important;
+}
+.nav-cta:hover { border-color: var(--accent); background: oklch(0.75 0.13 205 / 0.1) !important; }
+
+.menu-btn { display: none; }
+
+/* ─────────────── shared section furniture ─────────────── */
+main { position: relative; z-index: 1; }
+
+.section {
+  max-width: var(--shell);
+  margin: 0 auto;
+  padding: clamp(76px, 11vw, 132px) clamp(20px, 4vw, 48px);
+}
+/* Full-bleed for layout only. It used to tint its background, which broke the
+   page into visible slabs and blocked the ambient mesh behind it — one
+   continuous surface reads better and lets the background stay visible the
+   whole way down. */
+.band { max-width: none; }
+.band > * { max-width: var(--shell); margin-inline: auto; }
+
+.section-head { max-width: 700px; margin-bottom: clamp(40px, 5vw, 64px); }
+.section-head h2 { font-size: clamp(27px, 3.6vw, 41px); font-weight: 700; margin: 0 0 14px; line-height: 1.15; }
+.section-sub { color: var(--text-dim); font-size: 16.5px; margin: 0; }
+.section-sub.center { max-width: 560px; margin: 0 auto; }
+
+.kicker {
+  font-family: var(--mono);
+  font-size: 11.5px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--accent); margin: 0 0 14px;
+}
+
+/* ─────────────── hero ─────────────── */
+.hero {
+  max-width: var(--shell); margin: 0 auto;
+  padding: clamp(64px, 12vh, 128px) clamp(20px, 4vw, 48px) clamp(72px, 10vw, 112px);
+  text-align: center;
+  min-height: min(88vh, 820px);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.eyebrow {
+  font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em;
+  color: var(--text-faint); margin: 0 0 26px;
+  padding: 7px 15px; border: 1px solid var(--line-soft); border-radius: 999px;
+  background: oklch(1 0 0 / 0.02);
+}
+.hero h1 {
+  font-size: clamp(38px, 7vw, 82px); font-weight: 800; line-height: 1.03;
+  margin: 0 0 24px; max-width: 15ch;
+}
+.grad {
+  background: linear-gradient(100deg, var(--accent), var(--violet));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.lede { max-width: 62ch; color: var(--text-dim); font-size: clamp(15.5px, 1.5vw, 18px); margin: 0 0 36px; }
+
+.hero-actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 13px 24px; border-radius: 11px;
+  font-family: var(--sans); font-size: 15px; font-weight: 600;
+  border: 1px solid transparent; cursor: pointer;
+  transition: transform .25s var(--ease), background .25s, border-color .25s, box-shadow .25s;
+}
+.btn:active { transform: scale(0.985); }
+.btn-primary {
+  background: var(--accent); color: #06131a;
+  box-shadow: 0 8px 26px -10px oklch(0.75 0.13 205 / 0.6);
+}
+.btn-primary:hover { color: #06131a; transform: translateY(-2px); box-shadow: 0 14px 34px -12px oklch(0.75 0.13 205 / 0.75); }
+.btn-ghost { border-color: var(--line); color: var(--text); background: oklch(1 0 0 / 0.02); }
+.btn-ghost:hover { color: var(--text); border-color: var(--accent); transform: translateY(-2px); }
+
+.stats {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 12px; margin: clamp(48px, 7vw, 76px) 0 0; padding: 0;
+  width: 100%; max-width: 720px;
+}
+.stats div { text-align: center; }
+.stats dt {
+  font-family: var(--display); font-size: clamp(26px, 3.4vw, 38px); font-weight: 800;
+  background: linear-gradient(140deg, var(--accent), var(--violet));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  font-variant-numeric: tabular-nums;
+}
+.stats dd { margin: 4px 0 0; font-size: 12.5px; color: var(--text-faint); line-height: 1.4; }
+
+/* ─────────────── project cards ─────────────── */
+.cards {
+  display: grid; gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+}
+.card {
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column;
+  padding: 26px 26px 22px;
+  background: var(--bg-raised);
+  border: 1px solid var(--line-soft); border-radius: var(--r);
+  transition: transform .4s var(--ease), border-color .4s, box-shadow .4s;
+}
+/* The pointer-following highlight. Position comes from JS as --mx/--my;
+   opacity is the only thing that animates, so hover stays cheap. */
+.card::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 0%),
+              oklch(0.75 0.13 205 / 0.10), transparent 62%);
+  opacity: 0; transition: opacity .4s var(--ease);
+}
+.card:hover { transform: translateY(-4px); border-color: oklch(0.4 0.05 205); box-shadow: 0 22px 48px -26px oklch(0 0 0 / 0.8); }
+.card:hover::before { opacity: 1; }
+
+.card-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.card-top h3 { font-family: var(--mono); font-size: 18px; font-weight: 500; margin: 0; color: var(--text); }
+.chip {
+  font-size: 11.5px; color: var(--text-faint);
+  padding: 4px 10px; border: 1px solid var(--line-soft); border-radius: 999px; white-space: nowrap;
+}
+
+.card-what { margin: 0 0 14px; color: var(--text-dim); font-size: 15px; }
+/* An aside, not a callout. The boxed version shouted on every card and made
+   six of them read like a slide deck. */
+.card-note {
+  margin: 0 0 20px; font-size: 13.8px; color: var(--text-faint);
+  padding-left: 13px; border-left: 2px solid oklch(0.75 0.13 205 / 0.42);
+}
+
+.card-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: auto; }
+.tag {
+  font-family: var(--mono); font-size: 11px; color: var(--text-faint);
+  padding: 3px 8px; border-radius: 6px; background: oklch(1 0 0 / 0.035);
+}
+.card-link { margin-left: auto; font-size: 13.5px; font-weight: 600; white-space: nowrap; }
+
+.more { margin: 34px 0 0; color: var(--text-faint); font-size: 14.5px; }
+
+/* ─────────────── stack ─────────────── */
+.stack-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(268px, 1fr)); }
+.stack-col {
+  padding: 24px; border: 1px solid var(--line-soft); border-radius: var(--r);
+  background: var(--bg-raised);
+  transition: border-color .35s var(--ease), transform .35s var(--ease);
+}
+.stack-col:hover { border-color: oklch(0.38 0.05 205); transform: translateY(-3px); }
+.stack-col h3 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; color: var(--accent); margin: 0 0 14px; }
+.chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 7px; }
+
+/* Each chip carries its brand colour in --brand, set inline from the icon set.
+   At rest the mark is monochrome so the column reads as one thing; the colour
+   only arrives on hover, which keeps thirty logos from turning the section
+   into a sticker album. */
+.chip-tech {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 6px 11px 6px 9px;
+  border: 1px solid var(--line-soft); border-radius: 9px;
+  background: oklch(1 0 0 / 0.022);
+  font-size: 13px; color: var(--text-dim);
+  transition: color .25s var(--ease), border-color .25s var(--ease),
+              background .25s var(--ease), transform .25s var(--ease);
+}
+.chip-label { white-space: nowrap; }
+.chip-tech svg {
+  width: 15px; height: 15px; flex-shrink: 0;
+  fill: var(--text-faint);
+  transition: fill .25s var(--ease), transform .35s var(--ease);
+}
+.chip-tech:hover {
+  color: var(--text);
+  border-color: color-mix(in oklab, var(--brand, var(--accent)) 55%, transparent);
+  background: color-mix(in oklab, var(--brand, var(--accent)) 9%, transparent);
+  transform: translateY(-2px);
+}
+.chip-tech:hover svg { fill: var(--brand, var(--accent)); transform: scale(1.12); }
+
+
+/* ─────────────── about ─────────────── */
+.about-wrap { display: grid; gap: 40px; grid-template-columns: 1.55fr 1fr; align-items: start; }
+.about-wrap h2 { font-size: clamp(26px, 3.4vw, 38px); font-weight: 700; margin: 0 0 20px; }
+.about-wrap p { color: var(--text-dim); margin: 0 0 16px; }
+
+.facts {
+  padding: 26px; border: 1px solid var(--line-soft); border-radius: var(--r);
+  background: var(--bg-raised); position: sticky; top: 104px;
+}
+.facts h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.09em; color: var(--accent); margin: 0 0 18px; }
+.facts ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.facts li { display: grid; gap: 3px; }
+.facts span { font-size: 11.5px; color: var(--text-faint); font-family: var(--mono); letter-spacing: 0.05em; }
+.facts b { font-size: 14.5px; font-weight: 600; color: var(--text); }
+
+/* ─────────────── contact ─────────────── */
+.contact { text-align: center; }
+.contact h2 { font-size: clamp(28px, 4vw, 44px); font-weight: 700; margin: 0 0 14px; }
+.contact-actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 32px; }
+
+footer {
+  position: relative; z-index: 1;
+  padding: 26px clamp(20px, 4vw, 48px); text-align: center;
+  border-top: 1px solid var(--line-soft);
+}
+footer p { margin: 0; font-size: 13px; color: var(--text-faint); }
+
+/* ─────────────── reveal on scroll ─────────────── */
+.reveal {
+  opacity: 0; transform: translateY(22px);
+  transition: opacity .75s var(--ease), transform .75s var(--ease);
+  transition-delay: calc(var(--d, 0) * 90ms);
+}
+.reveal.in { opacity: 1; transform: none; }
+
+/* ─────────────── responsive ─────────────── */
+@media (max-width: 900px) {
+  .about-wrap { grid-template-columns: 1fr; }
+  .facts { position: static; }
+}
+
+@media (max-width: 720px) {
+  .menu-btn {
+    display: grid; place-content: center; gap: 5px;
+    width: 40px; height: 40px; padding: 0;
+    background: none; border: 1px solid var(--line); border-radius: 10px; cursor: pointer;
+  }
+  .menu-btn span { display: block; width: 17px; height: 1.5px; background: var(--text); transition: transform .3s var(--ease), opacity .3s; }
+  .menu-btn[aria-expanded="true"] span:first-child { transform: translateY(3px) rotate(45deg); }
+  .menu-btn[aria-expanded="true"] span:last-child { transform: translateY(-3.5px) rotate(-45deg); }
+
+  nav { flex-wrap: wrap; }
+  .nav-links {
+    display: none; order: 3; width: 100%;
+    flex-direction: column; align-items: stretch; gap: 2px;
+    padding-top: 12px; margin-top: 12px; border-top: 1px solid var(--line-soft);
+  }
+  .nav-links.open { display: flex; }
+  .nav-cta { margin: 6px 0 0; text-align: center; }
+
+  .stats { grid-template-columns: repeat(2, 1fr); gap: 22px 12px; }
+  .cards { grid-template-columns: 1fr; }
+}
+
+/* Honour a stated preference for less motion: everything still arrives,
+   nothing moves to get there. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+/* The design is committed to one dark world. A light theme here would be a
+   different design, not an inverted one — so the palette is fixed and the
+   colour-scheme is declared so form controls and scrollbars match. */
+:root { color-scheme: dark; }
+
+/* ─────────────── language toggle ─────────────── */
+.lang-btn {
+  display: inline-flex; align-items: center; gap: 3px;
+  margin-left: auto; margin-right: 4px;
+  padding: 7px 11px;
+  background: oklch(1 0 0 / 0.03);
+  border: 1px solid var(--line); border-radius: 9px;
+  font-family: var(--mono); font-size: 11.5px; font-weight: 500; letter-spacing: .04em;
+  color: var(--text-faint); cursor: pointer;
+  transition: border-color .25s var(--ease), color .25s;
+}
+.lang-btn:hover { border-color: var(--accent); color: var(--text); }
+/* Whichever language is active is the bright half. */
+.lang-btn .lang-on  { color: var(--accent); }
+.lang-btn .lang-off { color: var(--text-faint); }
+.lang-btn.de .lang-on  { color: var(--text-faint); }
+.lang-btn.de .lang-off { color: var(--accent); }
+.lang-sep { opacity: .4; }
+
+/* ─────────────── language nudge ─────────────── */
+.lang-nudge {
+  position: fixed; z-index: 60;
+  left: 50%; bottom: 22px; transform: translate(-50%, 140%);
+  display: flex; flex-wrap: wrap; align-items: center; gap: 14px;
+  max-width: min(560px, calc(100vw - 32px));
+  padding: 15px 18px;
+  background: oklch(0.19 0.014 260 / 0.94);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--line); border-radius: 14px;
+  box-shadow: 0 24px 60px -22px oklch(0 0 0 / 0.85);
+  transition: transform .55s var(--ease), opacity .4s var(--ease);
+  opacity: 0;
+}
+.lang-nudge.show { transform: translate(-50%, 0); opacity: 1; }
+.lang-nudge p { margin: 0; font-size: 14.5px; color: var(--text); }
+.lang-nudge-actions { display: flex; gap: 8px; margin-left: auto; }
+.btn-sm { padding: 9px 15px; font-size: 13.5px; border-radius: 9px; }
+
+@media (max-width: 560px) {
+  .lang-nudge { flex-direction: column; align-items: stretch; text-align: center; }
+  .lang-nudge-actions { margin-left: 0; }
+  .btn-sm { flex: 1; justify-content: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lang-nudge { transition: none; transform: translate(-50%, 0); }
+  .lang-nudge:not(.show) { display: none; }
+}
+
+/* Brand colours, one rule per chip. These were inline style attributes,
+   which a CSP without 'unsafe-inline' in style-src blocks outright — so they
+   worked on localhost and would have silently failed in production. Moving
+   them here keeps the policy strict at no cost.
+   Each is already lifted to clear 4.5:1 against the background. */
+.chip-tech[data-brand="3776ab"] { --brand: #3776AB; }
+.chip-tech[data-brand="3178c6"] { --brand: #3178C6; }
+.chip-tech[data-brand="kotlin"] { --brand: #7F52FF; }
+.chip-tech[data-brand="f7df1e"] { --brand: #F7DF1E; }
+.chip-tech[data-brand="4169e1"] { --brand: #4169E1; }
+.chip-tech[data-brand="2d76ad"] { --brand: #2D76AD; }
+.chip-tech[data-brand="6db33f"] { --brand: #6DB33F; }
+.chip-tech[data-brand="next-js"] { --brand: #737373; }
+.chip-tech[data-brand="e10098"] { --brand: #E10098; }
+.chip-tech[data-brand="61dafb"] { --brand: #61DAFB; }
+.chip-tech[data-brand="737373"] { --brand: #737373; }
+.chip-tech[data-brand="547580"] { --brand: #547580; }
+.chip-tech[data-brand="pandas"] { --brand: #786F9F; }
+.chip-tech[data-brand="f7931e"] { --brand: #F7931E; }
+.chip-tech[data-brand="7a76ff"] { --brand: #7A76FF; }
+.chip-tech[data-brand="f37626"] { --brand: #F37626; }
+.chip-tech[data-brand="pyarrow"] { --brand: #737373; }
+.chip-tech[data-brand="7fc8ff"] { --brand: #7FC8FF; }
+.chip-tech[data-brand="ffd21e"] { --brand: #FFD21E; }
+.chip-tech[data-brand="chromadb"] { --brand: #737373; }
+.chip-tech[data-brand="streamlit"] { --brand: #FF4B4B; }
+.chip-tech[data-brand="2496ed"] { --brand: #2496ED; }
+.chip-tech[data-brand="2088ff"] { --brand: #2088FF; }
+.chip-tech[data-brand="5b787f"] { --brand: #5B787F; }
+.chip-tech[data-brand="25a162"] { --brand: #25A162; }
+.chip-tech[data-brand="vitest"] { --brand: #00FF74; }
+.chip-tech[data-brand="vercel"] { --brand: #737373; }
+.chip-tech[data-brand="f03c2e"] { --brand: #F03C2E; }
