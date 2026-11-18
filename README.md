@@ -10,7 +10,7 @@ Available for a Werkstudent position, 16–20 hours a week.
 
 ---
 
-Selected work —
+Selected work -
 [wayfare](https://github.com/aamirabbas858/wayfare) ·
 [silbe](https://github.com/aamirabbas858/silbe) ·
 [matchbox](https://github.com/aamirabbas858/matchbox) ·

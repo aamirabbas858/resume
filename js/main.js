@@ -5,7 +5,7 @@
  * enough that the animation is the only thing the browser is doing.
  *
  * Motion preference is checked once and honoured everywhere: if someone has
- * asked for less of it, the observers still run so content still arrives —
+ * asked for less of it, the observers still run so content still arrives -
  * they just arrive already in place.
  */
 
@@ -13,7 +13,7 @@ const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ── reveal on scroll ──────────────────────────────────────────────────
    Elements start hidden in CSS and are revealed once. Unobserved after
-   firing, so scrolling back up does not replay the animation — a page that
+   firing, so scrolling back up does not replay the animation - a page that
    re-animates on every pass is exhausting to read. */
 const revealables = document.querySelectorAll('.reveal');
 
@@ -79,7 +79,7 @@ if (sections.length) {
 
 /* ── pointer-following highlight on cards ──────────────────────────────
    Only two custom properties are written, and the gradient they drive is
-   already painted — so this never triggers layout. Skipped entirely for
+   already painted - so this never triggers layout. Skipped entirely for
    coarse pointers, where there is no cursor to follow and the listener
    would fire on every touch for nothing. */
 const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -127,7 +127,7 @@ window.matchMedia('(max-width: 720px)').addEventListener('change', (e) => {
 });
 
 /* ── constellation background ──────────────────────────────────────────
-   A slow mesh of dots joined to their near neighbours — the same visual
+   A slow mesh of dots joined to their near neighbours - the same visual
    language as the day-coloured map in wayfare.
 
    Sized from the viewport rather than the canvas element. Measuring
@@ -135,7 +135,7 @@ window.matchMedia('(max-width: 720px)').addEventListener('change', (e) => {
    density formula based on area and produced two nodes and one line.
 
    Deliberately restrained: it should be noticed only if looked for. No
-   scroll parallax — offsetting a fixed layer against the page read as the
+   scroll parallax - offsetting a fixed layer against the page read as the
    background sliding around, which is worse than not moving at all.
 
    Stops when the tab is hidden. Skipped under reduced motion and on narrow
@@ -158,7 +158,7 @@ window.matchMedia('(max-width: 720px)').addEventListener('change', (e) => {
 
   function size() {
     // The viewport, not the element. The canvas is fixed and full-bleed, so
-    // these are the same thing — and innerWidth is correct before layout.
+    // these are the same thing - and innerWidth is correct before layout.
     w = window.innerWidth;
     h = window.innerHeight;
 
@@ -193,7 +193,7 @@ window.matchMedia('(max-width: 720px)').addEventListener('change', (e) => {
     for (const n of nodes) {
       n.x += n.vx;
       n.y += n.vy;
-      // Wrapped, not bounced — bouncing makes the edges of the field visible.
+      // Wrapped, not bounced - bouncing makes the edges of the field visible.
       if (n.x < -30) n.x = w + 30; else if (n.x > w + 30) n.x = -30;
       if (n.y < -30) n.y = h + 30; else if (n.y > h + 30) n.y = -30;
     }
@@ -251,7 +251,7 @@ window.matchMedia('(max-width: 720px)').addEventListener('change', (e) => {
    of the two and the other is whatever the page already said.
 
    The page never switches language on its own. A German browser gets English
-   with an offer, not a decision made for it — guessing from Accept-Language
+   with an offer, not a decision made for it - guessing from Accept-Language
    is a guess, and being switched without asking is worse than being asked.
 
    <html lang> moves with the choice. That matters beyond tidiness: a screen
@@ -265,7 +265,7 @@ window.matchMedia('(max-width: 720px)').addEventListener('change', (e) => {
   // Nested translations cannot work: replacing a parent's innerHTML destroys
   // the children before their turn arrives, and the child's German is silently
   // lost. Every translation here is plain text, so a translated element should
-  // never contain another — filtering them out makes that constraint hold even
+  // never contain another - filtering them out makes that constraint hold even
   // if someone adds one later.
   const nodes = [...document.querySelectorAll('[data-de]')].filter(
     (el) => !el.parentElement?.closest('[data-de]')
@@ -273,8 +273,8 @@ window.matchMedia('(max-width: 720px)').addEventListener('change', (e) => {
   const KEY = 'lang';
 
   const META = {
-    en: { title: 'Abbas Aamir — Computer Science, Berlin', aria: 'Auf Deutsch umschalten' },
-    de: { title: 'Abbas Aamir — Informatik, Berlin',       aria: 'Switch to English' },
+    en: { title: 'Abbas Aamir - Computer Science, Berlin', aria: 'Auf Deutsch umschalten' },
+    de: { title: 'Abbas Aamir - Informatik, Berlin',       aria: 'Switch to English' },
   };
 
   // localStorage throws in private mode on some browsers, so every access is
@@ -327,7 +327,7 @@ window.matchMedia('(max-width: 720px)').addEventListener('change', (e) => {
       hideNudge();
     });
     document.getElementById('nudgeNo')?.addEventListener('click', () => {
-      store.set('en');   // asked and answered — do not ask again
+      store.set('en');   // asked and answered - do not ask again
       hideNudge();
     });
     // Escape dismisses it too. A prompt that can only be answered is a dialog,

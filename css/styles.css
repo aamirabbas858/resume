@@ -1,6 +1,6 @@
 /* ─────────────────────────────────────────────────────────────
    Tokens. Neutrals sit on hue 260 with almost no chroma, so the
-   greys read cool rather than dead — a pure grey looks unchosen.
+   greys read cool rather than dead - a pure grey looks unchosen.
    ───────────────────────────────────────────────────────────── */
 :root {
   --bg:          oklch(0.14 0.01 260);
@@ -121,7 +121,7 @@ nav {
   border-bottom: 1px solid transparent;
   transition: background .35s var(--ease), border-color .35s var(--ease), padding .35s var(--ease);
 }
-/* Set by JS once the page has scrolled — the bar earns its weight. */
+/* Set by JS once the page has scrolled - the bar earns its weight. */
 nav.scrolled {
   background: oklch(0.13 0.01 260 / 0.82);
   border-bottom-color: var(--line-soft);
@@ -136,7 +136,7 @@ nav.scrolled {
   letter-spacing: -0.035em;
   line-height: 1;
   /* The gradient sits on the text itself rather than a tile beside it, and
-     shifts on hover — the name is the logo. */
+     shifts on hover - the name is the logo. */
   background: linear-gradient(96deg, var(--text) 18%, var(--accent) 62%, var(--violet));
   background-size: 200% 100%;
   -webkit-background-clip: text; background-clip: text; color: transparent;
@@ -174,7 +174,7 @@ main { position: relative; z-index: 1; }
   padding: clamp(76px, 11vw, 132px) clamp(20px, 4vw, 48px);
 }
 /* Full-bleed for layout only. It used to tint its background, which broke the
-   page into visible slabs and blocked the ambient mesh behind it — one
+   page into visible slabs and blocked the ambient mesh behind it - one
    continuous surface reads better and lets the background stay visible the
    whole way down. */
 .band { max-width: none; }
@@ -407,7 +407,7 @@ footer p { margin: 0; font-size: 13px; color: var(--text-faint); }
 }
 
 /* The design is committed to one dark world. A light theme here would be a
-   different design, not an inverted one — so the palette is fixed and the
+   different design, not an inverted one - so the palette is fixed and the
    colour-scheme is declared so form controls and scrollbars match. */
 :root { color-scheme: dark; }
 
@@ -461,7 +461,7 @@ footer p { margin: 0; font-size: 13px; color: var(--text-faint); }
 }
 
 /* Brand colours, one rule per chip. These were inline style attributes,
-   which a CSP without 'unsafe-inline' in style-src blocks outright — so they
+   which a CSP without 'unsafe-inline' in style-src blocks outright - so they
    worked on localhost and would have silently failed in production. Moving
    them here keeps the policy strict at no cost.
    Each is already lifted to clear 4.5:1 against the background. */
